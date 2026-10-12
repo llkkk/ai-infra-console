@@ -8,7 +8,7 @@ export const SCENARIOS=[
   {label:'装机工作台 TASK-DEMO-01',link:{type:'provision',id:'TASK-DEMO-01'}},
   {label:'集群 compute-lab',link:{type:'cluster',id:'compute-lab'}},
   {label:'节点 compute-01',link:{type:'node',id:'compute-01'}},
-  {label:'集群能力验收（部分通过）',link:{page:'cluster-capabilities'}},
+  {label:'查看集群能力状态（部分通过）',link:{page:'clusters'}},
   {label:'分配 ALLOC-DEMO-01',link:{type:'allocation',id:'ALLOC-DEMO-01'}},
   {label:'交付环境 ENV-DEMO-01',link:{type:'environment',id:'ENV-DEMO-01'}},
   {label:'工作负载 infer-demo（模型就绪待 S2 验收）',link:{type:'workload',id:'infer-demo'}}]},
@@ -26,10 +26,9 @@ export const SCENARIOS=[
   {label:'分配 ALLOC-DEMO-02',link:{type:'allocation',id:'ALLOC-DEMO-02'}},
   {label:'环境 ENV-DEMO-02（S2 影响待确认）',link:{type:'environment',id:'ENV-DEMO-02'}},
   {label:'工作负载 batch-demo',link:{type:'workload',id:'batch-demo'}}]},
- {id:'capacity',title:'容量不足与配额缺口',desc:'配额不是容量；预留不是实际占用',steps:[
+ {id:'capacity',title:'容量不足与资源约束' ,desc:'资源约束不是容量；预留不是实际占用',steps:[
   {label:'申请 REQ-DEMO-03（8 卡 > 可分配 6）',link:{type:'request',id:'REQ-DEMO-03'},note:'切到“匹配结果”页签'},
   {label:'资源池 gpu-general 容量口径',link:{type:'pool',id:'gpu-general'}},
-  {label:'项目配额（模型工程剩余 2）',link:{type:'quota',id:'S2 / 模型工程'}},
   {label:'申请 REQ-DEMO-01（容量够、配额不足）',link:{type:'request',id:'REQ-DEMO-01'},note:'切到“匹配结果”页签'}]},
  {id:'release',title:'释放回收',desc:'工作负载 / 数据 / 权限分别确认；不清盘共享节点',steps:[
   {label:'环境 ENV-DEMO-02（释放预检不通过）',link:{type:'environment',id:'ENV-DEMO-02'},note:'切到“释放回收”页签'},

@@ -51,7 +51,7 @@ export const taskRecords=[
   phases:[{name:'模板与预检',state:'成功',at:'09:00',log:'示例记录。'},{name:'集群创建与纳管',state:'成功',at:'09:20',log:'Rancher 导入成功；能力验收另行执行。'}],
   confirmPoints:[],acceptance:[['API / Node','就绪（示例）','—'],['能力验收','未开始','独立流程']]}
 ];
-export const taskRows=taskRecords.map(t=>[t.id,t.type,t.target,t.stage,t.state,t.source,t.created]);
+export const taskRows=taskRecords.map(t=>[t.id,t.type,t.target,t.region||'实验中心',t.stage,t.state,t.source,t.created]);
 export const provisioningRows=taskRecords.map(t=>[t.id,t.target,t.template,t.stage,t.state,t.source,t.auth]);
 
 // ---------- BMC ----------
@@ -77,8 +77,8 @@ export const capabilityRows=capabilityRecords.map(c=>[c.id,c.cpu,c.disknet,c.gpu
 
 // ---------- 集群 / 节点 / GPU ----------
 export const clusterRows=[
- ['compute-lab','实验中心','RKE2 / 示例','1 / 2','就绪','已导入','CAPI 候选'],
- ['cpu-lab','实验中心','RKE2 / 示例','1 / 1','未知','未连接','已有集群接入']
+ ['compute-lab','实验中心','RKE2 / 示例','1 / 2','就绪','已导入','部分通过','CAPI 候选'],
+ ['cpu-lab','实验中心','RKE2 / 示例','1 / 1','未知','未连接','未检查','已有集群接入']
 ];
 export const nodeRecords=[
  {id:'compute-01',cluster:'compute-lab',role:'工作节点',state:'Ready',gpu:'8 × 示例 GPU',asset:'compute-01',sched:'允许'},
