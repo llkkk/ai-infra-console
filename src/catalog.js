@@ -1,25 +1,24 @@
 // Page content is fictional. Technology choices remain design candidates.
 // 跨页面共享对象的行数据统一来自 model.js，避免同一对象在不同页面状态不一致。
-import {bmcRows,capabilityRows,provisioningRows,clusterRows,nodeRows,gpuRows,allocationRows,deliveryRows,workloadRows,requestRows,alertRows,incidentRows,sessionRows,imageRows,taskRows,poolRows} from './model.js';
+import {bmcRows,provisioningRows,clusterRows,nodeRows,gpuRows,allocationRows,deliveryRows,workloadRows,requestRows,alertRows,sessionRows,imageRows,allTaskRows as taskRows,poolRows,channelRows,platformServiceRows} from './model.js';
 const list=(title,description,columns,rows,detail,action)=>({title,description,columns,rows,detail,action});
 const detail=(title,description,fields,tabs=[],action)=>({title,description,fields,tabs,action});
 export const groups=[
  ['overview','总览',[['overview','基础设施总览']]],
- ['assets','基础设施',[['assets','服务器资产'],['bmc','BMC 与硬件'],['capabilities','硬件能力'],['images','镜像与装机模板'],['provisioning','装机任务'],['baselines','硬件基线']]],
+ ['assets','基础设施',[['assets','服务器资产'],['bmc','BMC 与硬件'],['images','镜像与装机模板'],['provisioning','装机任务'],['baselines','硬件基线']]],
  ['clusters','集群与算力',[['clusters','Kubernetes 集群'],['nodes','节点'],['gpus','GPU 设备'],['cluster-templates','集群模板'],['specs','资源规格']]],
  ['pools','资源与交付',[['pools','资源池'],['allocations','资源分配'],['environment-requests','环境申请'],['deliveries','交付环境'],['workloads','工作负载状态']]],
- ['monitor','监控与告警',[['monitor','监控总览'],['alerts','告警事件'],['incidents','故障事件'],['policies','告警策略']]],
+ ['monitor','监控与告警',[['monitor','监控总览'],['alerts','告警与故障'],['channels','通知渠道'],['policies','告警策略']]],
  ['audit','运维与审计',[['audit','运维接入'],['sessions','会话记录'],['operations','操作记录']]],
  ['services','基础服务',[['registry','镜像服务'],['storage','存储服务'],['database','数据库服务'],['services','服务目录']]],
  ['tasks','任务中心',[['tasks','任务列表']]],
- ['settings','平台治理',[['settings','区域与故障域'],['credentials','凭据引用']]]
+ ['settings','平台治理',[['settings','区域与故障域'],['platform-services','平台服务管理'],['credentials','凭据引用']]]
 ];
 export const catalog={
  overview:{title:'基础设施总览',description:'单中心基础设施、集群与算力资源的统一视图；所有数值为示例。',dashboard:'overview'},
  bmc:list('BMC 与硬件','带外连接、硬件事实、电源、介质和传感器分开呈现；无数据显式标未知，操作均为示例预检。',['资产','BMC 地址','协议','连接','电源','硬件快照','传感器'],bmcRows,'bmc-detail','asset-actions'),
  'bmc-detail':detail('BMC 与硬件详情','BMC 是带外事实来源和受控操作入口，不等同于 OS 或 Kubernetes 状态。',[['资产','compute-01'],['BMC 地址','bmc-01.example.invalid'],['协议','Redfish（示例）'],['连接状态','已登记，未连接真实接口'],['电源状态','示例开机'],['远程介质','未挂载'],['KVM/VNC','厂商能力待确认'],['硬件快照','来源、时间和版本待接入']],['连接与能力','硬件快照','传感器','电源/介质'],'asset-actions'),
- capabilities:list('硬件能力','汇总资产的硬件事实、拓扑、固件和验收结果，供资源匹配使用。',['资产','CPU / 内存','磁盘 / 网络','GPU','拓扑','基线','可交付'],capabilityRows,'capability-detail','baseline'),
- 'capability-detail':detail('硬件能力详情','当前能力与验收基线分开记录，并保留来源和采集时间。',[['资产','compute-01'],['硬件快照','HW-SNAPSHOT-DEMO-01'],['CPU / 内存','32 核 / 192 GiB'],['GPU / 拓扑','8 × 示例 GPU / NUMA 待采集'],['磁盘 / 网络','系统盘 + 数据盘 / 4 NIC'],['固件','厂商版本待接入'],['能力标签','gpu / amd64 / pool=gpu-general'],['交付条件','硬件、OS、集群能力均通过']],['设备清单','拓扑与固件','验收记录'],'baseline'),
+ // 硬件能力已合入资产管理：独立页面删除，能力字段见资产详情“硬件能力”页签；capabilityRecords 仅供测试与对象一致性引用。
  images:list('镜像与装机模板','镜像制品与磁盘、网络模板分别版本化，验证通过后才用于供应。',['模板','OS / 架构','镜像版本','磁盘策略','驱动管理','状态'],imageRows,'image','image'),
  image:detail('装机模板详情','模板与镜像关联，不代表模板适用于所有硬件。',[['模板','linux-baseline-01'],['镜像','img-demo-01 / 示例 SHA256 引用'],['架构','x86_64'],['系统盘','按序列号指定；预检确认'],['数据盘','保留；不自动格式化'],['网络模板','management-network-demo'],['驱动所有权','GPU Operator（候选）'],['验证范围','仅示例记录，不是 B300 验证']],['模板配置','适用资产','版本记录'],'image'),
  provisioning:list('装机任务','从预检、介质/PXE 到 OS 初始化和节点验收的异步任务；失败历史保留，不因重试覆盖。',['任务','资产','镜像/模板','当前阶段','状态','执行源','授权'],provisioningRows,'provisioning','provision'),
@@ -48,11 +47,12 @@ export const catalog={
  workload:detail('工作负载状态详情','区分 Kubernetes 状态、应用状态和模型业务就绪，避免平台误判模型成功。',[['工作负载','infer-demo'],['环境','ENV-DEMO-01 / s2-model'],['平台状态','Running'],['应用状态','Ready（示例）'],['模型就绪','待 S2 验收'],['资源占用','整卡 × 6 / 指标引用'],['故障归属','待根据事件和日志判定']],['状态事件','资源占用','故障协同'],'release'),
  allocation:detail('分配与环境交付','交付可用底座，不将模型上线作为底座状态；释放前确认工作负载与数据。',[['分配单','ALLOC-DEMO-01'],['来源请求','REQ-DEMO-01'],['规格 / 数量','整卡 / 6（示例）'],['集群 / namespace','compute-lab / s2-model'],['底座验收','节点 / 网络 / 存储 / 设备（示例）'],['S2 接收','使用约定待双方确认'],['镜像 / 模型存储','镜像服务引用 / 模型目录约定'],['发布责任','S2；发布入口待决策']],['交付信息','验收记录','占用事件','数据保留'],'release'),
  monitor:{title:'监控总览',description:'物理机、虚拟机、集群和 GPU 分层观测；趋势是固定示例而非实时指标。',dashboard:'monitor'},
- alerts:list('告警事件','底座告警与模型影响分开记录，失联和无数据不能视为健康；严重告警自动关联故障单。',['事件','严重度','对象','现象','状态','发生时间','影响','故障单'],alertRows,'alert','silence'),
- alert:detail('告警详情','关联资产、节点和分配记录，提供证据链而不自动判定业务失败；严重底座告警自动生成故障单。',[['事件','ALERT-DEMO-01'],['对象','compute-02 / GPU-DEMO-002'],['严重度','严重'],['底座现象','设备不可分配（示例）'],['规则来源','Prometheus / DCGM 候选'],['状态 / 时间','待确认 / 10-10 10:24（示例）'],['关联分配','ALLOC-DEMO-02'],['模型影响','待 S2 确认；不推断 API 失败'],['关联故障单','INC-DEMO-01 · 等待人工处理']],['诊断证据','关联对象','处理记录','故障单'],'silence'),
+ alerts:list('告警与故障','告警事件与故障单合并呈现，按级别（P0 严重 / P1 重要 / P2 警告 / 提示）区分；故障单行点击进入处理工作台；Kubernetes Events 可作为告警来源。',['事件','级别','类型','严重度','对象','现象','状态','发生时间','影响','关联故障单'],alertRows,'alert','silence'),
+ alert:detail('告警详情','关联资产、节点和分配记录，提供证据链而不自动判定业务失败；严重底座告警自动生成故障单。',[['事件','ALERT-DEMO-01'],['级别','P0'],['类型','告警事件'],['严重度','严重'],['对象','compute-02 / GPU-DEMO-002'],['底座现象','设备不可分配（示例）'],['规则来源','Prometheus / DCGM 候选'],['状态 / 时间','待确认 / 10-10 10:24（示例）'],['关联分配','ALLOC-DEMO-02'],['模型影响','待 S2 确认；不推断 API 失败'],['关联故障单','INC-DEMO-01 · 等待人工处理']],['诊断证据','关联对象','处理记录','故障单'],'silence'),
+ channels:list('通知渠道','配置告警通知渠道、级别路由规则与静默说明；渠道只记录路由约定，不保存真实联系方式。',['渠道','类型','接收对象','级别路由','状态'],channelRows,'channel','channel'),
+ channel:detail('通知渠道详情','某渠道的级别路由规则、接收对象与静默说明；静默只暂停通知，不改变资源状态。',[['渠道','oncall-sms'],['类型','短信（示例）'],['接收对象','S1 值班组'],['级别路由','P0 触发'],['静默说明','静默只暂停通知，不改变资源可分配状态'],['状态','已启用（示例）']],['通知路由','静默窗口'],'channel'),
  policies:list('告警策略','规则、通知与静默分工；受 GitOps 管理的规则不从页面旁路编辑。',['策略','层次','条件 / 示例','通知对象','管理来源','状态'],[['gpu-unavailable','GPU','设备异常持续 5 分钟','S1 / S2','外部规则配置','待验证'],['node-not-ready','集群','Node NotReady','S1 值班','外部规则配置','待验证'],['bmc-no-data','物理机','采集无数据','基础设施 / S1','页面候选','待验证']],'policy','policy'),
  policy:detail('告警策略详情','通知与静默不能改变资源真实状态。',[['策略','gpu-unavailable'],['信号','DCGM / 设备插件状态'],['持续时间','5 分钟（建议示例）'],['通知','S1 运维 / S2 联系方式引用'],['规则管理权','GitOps 候选，页面只读'],['缺数据策略','标未知，不视为恢复']],['规则条件','通知路由','静默窗口'],'silence'),
- incidents:list('故障事件','告警或任务失败自动生成故障单；时间线、责任归属、恢复复验和关闭条件分别记录。',['故障单','标题','严重度','当前阶段','责任归属','触发来源','开始时间'],incidentRows,'incident','incident-action'),
  incident:detail('故障处理工作台','告警、任务失败与故障单分开记录；关闭必须经过恢复复验，并经 S1 与 S2 确认业务影响消除。',[['故障单','INC-DEMO-01'],['严重度','严重'],['当前阶段','等待人工处理'],['责任归属','S1 底座 / 硬件组'],['触发来源','ALERT-DEMO-01'],['影响范围','ALLOC-DEMO-02 / ENV-DEMO-02 · 待 S2 确认'],['开始 / 更新','10-10 10:24 / 11:05（示例）'],['关闭条件','复验通过 + 双方确认']],['处理时间线','责任与边界','恢复复验','关联对象'],'incident-action'),
  audit:list('运维接入','按通道区分 WebShell、带外 KVM、Kubernetes API 和 Pod exec；各通道权限来源与审计能力不同。',['接入通道','目标范围','权限来源','审计能力','证据形态','状态'],[['WebShell / 主机命令','compute-01 等资产','平台授权引用（S4 IAM / RBAC）','会话与命令全量审计（平台自建）','会话记录 / 命令审计','示例可申请'],['带外 KVM','compute-02 / BMC','独立高权限授权','厂商接入留痕待适配','会话留痕（待适配）','待适配'],['Kubernetes API','management-demo / 业务集群','Rancher / S4 映射','API Audit 策略待定义','审计日志引用','待验证'],['Pod exec','s2-model 等命名空间','namespace RBAC','会话审计方案待确认','审计事件引用','待验证']],'access','access'),
  access:detail('运维接入详情','页面提供通道级的会话申请和授权关联，不展示密码或模拟命令执行。',[['通道','WebShell / 主机命令'],['目标范围','compute-01 等资产'],['权限来源','平台授权引用（S4 IAM / RBAC）'],['审计能力','会话与命令全量审计（平台自建）'],['证据形态','会话记录 / 命令审计'],['接入约定','授权后开放 WebShell 自由终端；会话与命令全量审计'],['会话关联','建立会话后关联审计证据']],['授权约定','关联会话'],'access'),
@@ -69,10 +69,12 @@ export const catalog={
  'database-detail':detail('数据库集群详情','本页管理集群实例与备份恢复状态；库、schema 与数据迁移由业务方负责，凭据只留引用。',[['集群','pg-cluster-demo'],['用途','平台业务数据底座'],['版本','PostgreSQL / 待锁定'],['架构','主备（示例）'],['节点','1 主 2 备（示例）'],['连接地址','pg-cluster.example.invalid（引用）'],['凭据','credential-db-demo（引用）'],['备份 / 恢复','每日全备（示例计划）；恢复演练未执行，通过演练才可标可恢复']],['实例配置','节点与连接','备份记录'],'service-request'),
  services:list('服务目录','登记消息、安全入口与交付流水线等其余公共服务；提供方逐项确认，不默认归 S1。',['服务','候选组件','用途','提供方','业务责任','状态'],[['消息','Kafka','事件传递','待确认','Topic / 事件契约','待确认'],['安全入口','网关 / WAF','服务暴露与防护','待确认','规则与证书审批','待确认'],['交付流水线','GitOps','配置发布','待确认','底座与模型分开','待确认'],['其他公共服务','按需登记','—','待确认','—','待确认']],'service','service-request'),
  service:detail('服务目录详情','服务能力、实例健康和业务配置分层，S1 不接管业务主数据。',[['服务','消息'],['候选组件','Kafka'],['提供方 / 运维方','待公共组件负责人确认'],['业务方','Topic 与事件契约由业务方定义'],['接入方式','IAM / RBAC 授权与凭据引用'],['容量 / SLA','待约定'],['备份责任','待提供方确认']],['服务约定','可用实例','接入记录'],'service-request'),
- tasks:list('任务列表','跨区域汇总装机、检查、建群、变更与维护；任务状态来自执行器，失败历史与重试记录保留。',['任务','类型','目标','区域','阶段','状态','执行源','创建时间'],taskRows,'task','task-retry'),
+ tasks:list('任务列表','跨区域汇总装机、检查、建群、变更、交付、维护与模型部署等异步任务；模型部署任务纳入任务中心统一跟踪；任务状态来自执行器，失败历史与重试记录保留。',['任务','类型','目标','区域','阶段','状态','执行源','创建时间'],taskRows,'task','task-retry'),
  task:detail('任务详情','逐阶段显示证据和可用操作，取消或重试必须确认执行器能力。',[['任务','TASK-DEMO-01'],['类型 / 目标','装机 / compute-04'],['状态','进行中（固定示例）'],['当前阶段','镜像供应'],['执行源','Ironic / BMH 候选'],['关联模板','linux-baseline-01'],['阶段开始','10-10 10:10（示例）']],['执行阶段','日志与事件','配置快照'],'task-retry'),
  settings:list('区域与故障域','一期记录区域、机房与故障域归属及连接状态，不提供跨区域自动迁移。',['区域','中心标识','机房','故障域','执行集群','连接','同步'],[['实验中心','center-demo-01','room-demo-A','room-demo-A（单机房域 · 示例）','management-demo','示例在线','10:24 / 示例'],['预留区域','center-demo-02','未配置','未配置','未配置','未接入','未知']],'region','region'),
  region:detail('区域详情','区域失联不代表资源已释放；断网自治另行设计。',[['区域标识','region-demo-01'],['中心标识','center-demo-01'],['机房','room-demo-A'],['故障域','room-demo-A（单机房域 · 示例）'],['执行归属','management-demo'],['连接状态','示例在线'],['断网策略','只读最后观测状态，不推断释放']],['区域配置','关联集群','连接事件'],'region'),
+ 'platform-services':list('平台服务管理','S2–S6 各平台自身服务的运行状态与常用操作；常用操作是对 Kubernetes 操作的封装演示，本质是 k8s 操作，不替代 Rancher 专业操作。',['平台','服务','类型','状态','常用操作'],platformServiceRows,'platform-service'),
+ 'platform-service':detail('平台服务详情','常用操作是对 Deployment / StatefulSet 的封装演示，点击仅提示说明，不执行真实 k8s 操作。',[['平台','S2 模型工程'],['服务','模型网关'],['类型','Deployment'],['状态','运行中（示例）'],['Namespace','s2-system（示例）'],['常用操作','重启 / 扩缩容 / 查看日志 / 回滚（演示）']],['服务信息','常用操作']),
  // 平台集成、版本矩阵与硬件适配矩阵不设前端页面：连接配置与版本组合属后台/配置管理（GitOps 候选），
  // 适配结论由验证证据维护；能力边界见 docs/s1-prototype-module-guide.md 模块地图章节。
  credentials:list('凭据引用','仅呈现凭据名称、用途和授权范围；不读取或显示密钥。',['引用','用途','托管方','授权范围','轮换策略','状态'],[['credential-bmc-demo','BMC','待选密钥系统','测试资产组','策略待确认','未接入'],['credential-cluster-demo','集群','管理集群 Secret 引用','固定 context','策略待确认','未接入']],'credential','credential'),
@@ -99,6 +101,7 @@ export const forms={
  acceptance:{title:'环境验收与交付',fields:[['分配单','ALLOC-DEMO-03'],['namespace','s2-test'],['权限引用','project-access-demo'],['镜像 / 存储约定','registry / model-storage-demo']],bind:{'分配单':0},checks:['底座网络、存储、设备与镜像检查通过','S2 接收约定与最小部署样例已确认']},
  release:{title:'项目资源释放',fields:[['分配单','ALLOC-DEMO-01'],['数据策略',['保留','按独立审阅方案删除']],['释放原因','联调结束']],bind:{'分配单':0},checks:['S2 工作负载已停止','数据保留与失联占用已对账'],warning:'只释放项目分配，不退出、重装或清盘共享节点。'},
  silence:{title:'告警处理与静默',fields:[['事件 / 规则','ALERT-DEMO-01'],['动作',['确认事件','静默通知']],['静默时长',['30 分钟','2 小时']],['原因','测试维护']],bind:{'事件 / 规则':0},checks:['影响与通知对象已核对'],warning:'静默不消除底座故障，不改变资源可分配状态。'},
+ 'channel':{title:'通知渠道配置',fields:[['渠道','oncall-sms'],['类型',['短信','邮件','企业微信','电话','Webhook']],['接收对象','S1 值班组'],['级别路由',['P0','P0 / P1','P1 / P2']]],checks:['接收对象与级别路由已核对'],warning:'渠道只记录路由约定，不保存真实联系方式；静默只暂停通知，不改变资源状态。'},
  'incident-action':{title:'故障处理动作',fields:[['故障单','INC-DEMO-01'],['动作',['确认故障','转交处理','记录恢复动作','申请恢复复验']],['责任方',['S1 底座','硬件 / 厂商','S2 应用（待确认）']],['恢复动作',['无（仅确认 / 记录类动作）','GPU 复位（破坏性）','主机下电（破坏性）','部件更换（破坏性）']],['处理说明','如：转交硬件组检查 PCIe 链路与 BMC 传感器']],bind:{'故障单':0},checks:['已核对影响对象与责任分界'],conditionalChecks:[{when:['恢复动作',['GPU 复位（破坏性）','主机下电（破坏性）','部件更换（破坏性）']],check:'破坏性恢复动作已单独确认对象、变更窗口与授权'}],warning:'恢复动作不自动关闭故障单。关闭门禁按影响范围确定：无 S2 影响由 S1 复验关闭；涉及已交付环境需 S1 与 S2 共同确认；影响未知不得按无影响关闭。'},
  policy:{title:'告警策略配置',fields:[['名称','node-not-ready'],['指标 / 条件','Node Ready = false'],['持续时间','5m'],['通知引用','oncall-demo'],['管理来源',['页面管理（候选）','GitOps 只读']]],warning:'由 GitOps 管理时只能生成变更建议，禁止页面旁路修改。'},
  access:{title:'运维会话申请',fields:[['通道',['WebShell / 主机命令','带外 KVM','Kubernetes API','Pod exec']],['目标范围','compute-01 等资产'],['身份 / 授权引用','project-access-demo'],['用途','故障排查']],bind:{'通道':0,'目标范围':1},checks:['已核对目标在当前授权范围内'],conditionalChecks:[{when:['通道',['WebShell / 主机命令']],check:'已核对 WebShell 授权与会话 / 命令全量审计能力'},{when:['通道',['带外 KVM']],check:'已确认厂商 KVM 接入留痕方式（当前待适配）'},{when:['通道',['Kubernetes API']],check:'已确认 RBAC 与 API Audit 策略；按 API 访问处理，不创建终端会话'},{when:['通道',['Pod exec']],check:'已确认 namespace RBAC 与会话审计方案'}],warning:'不同通道的授权与证据形态不同；WebShell 为平台自建自由终端并全量审计，本原型不提供真实终端。Kubernetes API 访问不套用终端会话语义。'},
@@ -109,4 +112,4 @@ export const forms={
 };
 // 技术方案弹窗已收窄到 基础设施 / 集群与算力 / 资源与交付 三个模块，
 // 内容改为 arch-lines.js 的三条流程线（装机线 / 集群线 / 使用线，移植自 s1-arch-diagram.html）。
-export function groupFor(page){return groups.find(([, ,children])=>children.some(([id])=>id===page))?.[0]||({image:'assets',baseline:'assets',bmc:'assets','bmc-detail':'assets',capabilities:'assets','capability-detail':'assets',provisioning:'assets','provisioning-detail':'assets',node:'clusters','cluster-template':'clusters','cluster-capability':'clusters','cluster-capability-detail':'clusters',gpu:'clusters',spec:'clusters',allocation:'pools','environment-request':'pools',delivery:'pools',workload:'pools',alert:'monitor',incident:'monitor',policy:'monitor',access:'audit',session:'audit',operation:'audit',service:'services',task:'tasks',region:'settings',credential:'settings',asset:'assets',cluster:'clusters',pool:'pools'}[page])||'overview';}
+export function groupFor(page){return groups.find(([, ,children])=>children.some(([id])=>id===page))?.[0]||({image:'assets',baseline:'assets',bmc:'assets','bmc-detail':'assets',provisioning:'assets','provisioning-detail':'assets',node:'clusters','cluster-template':'clusters','cluster-capability':'clusters','cluster-capability-detail':'clusters',gpu:'clusters',spec:'clusters',allocation:'pools','environment-request':'pools',delivery:'pools',workload:'pools',alert:'monitor',incident:'monitor',channel:'monitor',policy:'monitor',access:'audit',session:'audit',operation:'audit',service:'services',task:'tasks',region:'settings',credential:'settings','platform-service':'settings',asset:'assets',cluster:'clusters',pool:'pools'}[page])||'overview';}

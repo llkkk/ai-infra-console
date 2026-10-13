@@ -1,4 +1,4 @@
-import {bmcRecords,requestMatch,deliveryLife,clusterCapability,compute03Story,nodeRecords} from './model.js';
+import {bmcRecords,requestMatch,deliveryLife,clusterCapability,nodeRecords} from './model.js';
 
 // 页签内容优先按页面 + 当前对象上下文生成；未覆盖的页签回退到静态表。
 export function tabContent(page,active,context){
@@ -8,7 +8,6 @@ export function tabContent(page,active,context){
   'environment-request':requestTab,
   'delivery':deliveryTab,
   'cluster-capability-detail':clusterCapTab,
-  'capability-detail':capabilityTab,
   'node':nodeTab
  }[page];
  if(gen){const rows=gen(active,id);if(rows)return rows;}
@@ -59,16 +58,6 @@ function clusterCapTab(active,id){
  if(active==='组件版本')return [['CNI / CSI','选型待确认','集群模板'],['GPU 软件栈','Operator / 设备插件待验证','版本组合待锁定'],['管理来源','集群模板 / GitOps 候选','页面不旁路修改']];
  if(active==='探针证据')return [['最小探针','未执行','网络 / 存储 / GPU / 镜像'],['证据要求','探针结果留档后才能标通过','验收通过条件']];
  return null;
-}
-
-function capabilityTab(active,id){
- if(active!=='验收记录')return null;
- if(id==='compute-03')return [
-  ...compute03Story.acceptance,
-  ['硬件检查历史','09:50 失败 → 10:40 重检通过','TASK-DEMO-02；失败原因保留'],
-  ['结论',compute03Story.deliverable,'—']];
- if(id==='compute-02')return [['硬件 / OS 基线','通过（示例）','—'],['集群能力','通过（示例）','compute-lab'],['GPU 运行能力','部分受阻','GPU-DEMO-002 异常（INC-DEMO-01）']];
- return [['硬件 / OS 基线','通过（示例）','—'],['集群能力','通过（示例）','compute-lab'],['GPU 运行能力','待验证','DCGM 未接入']];
 }
 
 function nodeTab(active,id){

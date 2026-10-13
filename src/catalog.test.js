@@ -2,12 +2,12 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {catalog,groups,forms} from './catalog.js';
 import {INCIDENTS,closeGate} from './incident-data.js';
-import {LINK_TYPES,resolveLink} from './model.js';
+import {LINK_TYPES,resolveLink,incidentRows} from './model.js';
 test('all navigation entries have pages',()=>{for(const [, ,children] of groups)for(const [id] of children)assert.ok(catalog[id]||id==='assets','导航页面缺失：'+id);});
 test('all list/detail/form destinations exist',()=>{for(const p of Object.values(catalog)){if(p.detail)assert.ok(catalog[p.detail]||['cluster','pool'].includes(p.detail));if(p.action)assert.ok(forms[p.action]);if(p.columns)for(const row of p.rows)assert.equal(row.length,p.columns.length);}});
 test('plan fields have unique labels and no empty choices',()=>{for(const p of Object.values(forms)){assert.equal(new Set(p.fields.map(x=>x[0])).size,p.fields.length);for(const [,value] of p.fields)assert.ok(Array.isArray(value)?value.length:typeof value==='string');}});
 test('incident records reference existing catalog pages and alerts',()=>{
- assert.equal(catalog.incidents.rows.length,Object.keys(INCIDENTS).length);
+ assert.equal(incidentRows.length,Object.keys(INCIDENTS).length);
  for(const [id,inc] of Object.entries(INCIDENTS)){
   assert.equal(inc.id,id);
   assert.ok(inc.timeline.length>=3,id+' 时间线至少 3 条');

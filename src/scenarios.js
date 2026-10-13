@@ -17,7 +17,7 @@ export const SCENARIOS=[
   {label:'故障单 INC-DEMO-02（S1 复验关闭）',link:{type:'incident',id:'INC-DEMO-02'}},
   {label:'装机模板 gpu-baseline-02（r02 修订）',link:{type:'image',id:'gpu-baseline-02'}},
   {label:'资产 compute-03 当前状态（检查通过）',link:{type:'asset',id:'compute-03'}},
-  {label:'硬件能力台账（通过但不可交付）',link:{page:'capabilities'}}]},
+  {label:'资产 compute-03 硬件能力（已合入资产详情）',link:{type:'asset',id:'compute-03'},note:'切到“硬件能力”页签'}]},
  {id:'gpu-fault',title:'GPU 故障',desc:'告警 → 故障单 → 关联对象 → 恢复动作门禁 → 复验与关闭条件',steps:[
   {label:'告警 ALERT-DEMO-01',link:{type:'alert',id:'ALERT-DEMO-01'}},
   {label:'故障单 INC-DEMO-01（等待人工处理）',link:{type:'incident',id:'INC-DEMO-01'}},

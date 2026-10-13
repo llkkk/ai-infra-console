@@ -52,6 +52,12 @@ export const taskRecords=[
   confirmPoints:[],acceptance:[['API / Node','就绪（示例）','—'],['能力验收','未开始','独立流程']]}
 ];
 export const taskRows=taskRecords.map(t=>[t.id,t.type,t.target,t.region||'实验中心',t.stage,t.state,t.source,t.created]);
+// 模型部署后台任务：本质是起 Pod，纳入任务中心统一跟踪；不进入装机任务（provisioningRows）列表。
+export const modelDeployTaskRows=[
+ ['TASK-DEMO-04','模型部署','s2-model / infer-demo','实验中心','镜像拉取','进行中','Kubernetes Deployment（本质是起 Pod）','10-10 10:35'],
+ ['TASK-DEMO-05','模型部署','s2-test / batch-demo','实验中心','Pod 调度','排队中','Kubernetes Deployment（本质是起 Pod）','10-10 10:42']
+];
+export const allTaskRows=[...taskRecords.map(t=>[t.id,t.type,t.target,t.region||'实验中心',t.stage,t.state,t.source,t.created]),...modelDeployTaskRows];
 export const provisioningRows=taskRecords.map(t=>[t.id,t.target,t.template,t.stage,t.state,t.source,t.auth]);
 
 // ---------- BMC ----------
@@ -187,11 +193,48 @@ export const sessionRows=[
  ['SESSION-DEMO-03','demo-admin','management-demo / apiserver','Kubernetes API','10-10 11:02','已结束','API Audit 引用（候选）'],
  ['SESSION-DEMO-04','demo-hw','compute-02 / BMC','带外 KVM','10-10 11:10','待授权','厂商留痕待适配']
 ];
-export const alertRows=[
- ['ALERT-DEMO-01','严重','compute-02 / GPU-DEMO-002','设备不可分配','待确认','10-10 10:24','分配单影响待 S2 确认','INC-DEMO-01'],
- ['ALERT-DEMO-02','警告','reserve-01','BMC 无数据','待确认','10-10 09:40','未交付资产','—']
+// 告警与故障合并呈现：告警事件行 + 故障单行，类型列区分，按级别（P0 严重 / P1 重要 / P2 警告 / 提示）区分。
+// 列：事件 / 级别 / 类型 / 严重度 / 对象 / 现象 / 状态 / 发生时间 / 影响 / 关联故障单
+const alertEventRows=[
+ ['ALERT-DEMO-01','P0','告警事件','严重','compute-02 / GPU-DEMO-002','设备不可分配','待确认','10-10 10:24','分配单影响待 S2 确认','INC-DEMO-01'],
+ ['ALERT-DEMO-02','P2','告警事件','警告','reserve-01','BMC 无数据','待确认','10-10 09:40','未交付资产','—'],
+ ['ALERT-DEMO-03','P1','告警事件','重要','compute-lab / infer-demo','Pod 异常重启（Kubernetes Events 接入，示例）','待确认','10-10 10:30','ENV-DEMO-01 / s2-model','—']
 ];
+const incidentAlertRows=Object.values(INCIDENTS).map(i=>[
+ i.id,
+ i.severity==='严重'?'P0':i.severity==='重要'?'P1':'P2',
+ '故障单',
+ i.severity,
+ (i.objects.find(o=>o[2]==='gpu')||i.objects.find(o=>o[2]==='asset')||[])[1]||'—',
+ i.title+'（由 '+i.trigger+' 触发）',
+ i.phase,
+ i.started,
+ i.impact.split('；')[0],
+ '—'
+]);
+export const alertRows=[...alertEventRows,...incidentAlertRows];
 export const incidentRows=Object.values(INCIDENTS).map(i=>[i.id,i.title,i.severity,i.phase,i.owner,i.trigger,i.started]);
+
+// ---------- 通知渠道 ----------
+// 列：渠道 / 类型 / 接收对象 / 级别路由 / 状态。渠道只记录路由约定，不保存真实联系方式。
+export const channelRows=[
+ ['oncall-sms','短信','S1 值班组','P0','已启用（示例）'],
+ ['oncall-mail','邮件','S1 / S2 联系人','P0 / P1','已启用（示例）'],
+ ['wechat-ops','企业微信','S1 运维群','P1 / P2','已启用（示例）'],
+ ['phone-p0','电话','S1 值班负责人','P0','待验证'],
+ ['webhook-demo','Webhook','外部工单系统（引用）','P0 / P1','待接入']
+];
+
+// ---------- 平台服务管理 ----------
+// S2–S6 各平台自身服务的常用 k8s 操作封装；列：平台 / 服务 / 类型 / 状态 / 常用操作。
+export const platformServiceRows=[
+ ['S2 模型工程','模型网关','Deployment','运行中（示例）','重启 / 扩缩容 / 日志 / 回滚'],
+ ['S2 模型工程','推理服务 infer-demo','Deployment','运行中（示例）','重启 / 扩缩容 / 日志 / 回滚'],
+ ['S3 业务编排','订单服务','Deployment','运行中（示例）','重启 / 扩缩容 / 日志'],
+ ['S4 身份权限','IAM 服务','StatefulSet','运行中（示例）','重启 / 日志 / 回滚'],
+ ['S5 费用中心','计费服务','Deployment','待接入','重启 / 日志'],
+ ['S6 门户','控制台前端','Deployment','运行中（示例）','重启 / 扩缩容 / 日志']
+];
 
 // ---------- 集群能力验收 ----------
 export const clusterCapability={
@@ -220,6 +263,8 @@ export const LINK_TYPES={
  alert:{detail:'alert',rows:()=>alertRows},
  request:{detail:'environment-request',rows:()=>requestRows},
  incident:{detail:'incident',rows:()=>incidentRows},
+ channel:{detail:'channel',rows:()=>channelRows},
+ 'platform-service':{detail:'platform-service',rows:()=>platformServiceRows},
  cluster:{detail:'cluster',rows:()=>clusterRows},
  session:{detail:'session',rows:()=>sessionRows},
  pool:{detail:'pool',rows:()=>poolRows}

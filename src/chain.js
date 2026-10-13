@@ -5,7 +5,6 @@ export const CHAIN={
  supply:{label:'供应线 · 把机器变成可用算力',nodes:[
   ['服务器资产','assets','基础设施'],
   ['BMC 与硬件','bmc','基础设施'],
-  ['硬件能力','capabilities','基础设施'],
   ['镜像与模板','images','基础设施'],
   ['装机任务','provisioning','基础设施'],
   ['Kubernetes 集群','clusters','集群与算力'],

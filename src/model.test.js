@@ -43,7 +43,7 @@ test('容量不足：REQ-DEMO-03 匹配失败原因与容量口径一致',()=>{
 test('GPU 故障链：告警、故障单、GPU、分配、环境、工作负载互相印证',()=>{
  const inc=INCIDENTS['INC-DEMO-01'];
  const alert=alertRows.find(r=>r[0]==='ALERT-DEMO-01');
- assert.equal(alert[7],'INC-DEMO-01','告警应关联故障单');
+ assert.equal(alert[9],'INC-DEMO-01','告警应关联故障单');
  assert.equal(inc.trigger,'ALERT-DEMO-01');
  const gpu=gpuRecords.find(g=>g.id==='GPU-DEMO-002');
  assert.ok(gpu.health.includes('异常'));
