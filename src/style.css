@@ -10,3 +10,37 @@
 /* Compact navigation: keep the region switcher below regional entries. */
 .workspace{margin:12px 10px 10px;padding:7px 10px;background:transparent;border:0;display:block}.workspace-label{display:block;color:#7894a5;font-size:10px;margin-bottom:5px}.scope-tag{float:right;color:#88c4c6;font:9px monospace}.workspace select{display:block;width:100%;padding:6px 8px;background:#223b4b;color:#e7f0f3;border:1px solid #355160;border-radius:3px;font-size:11px}.sidebar nav{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#416273 transparent}.sidebar nav::-webkit-scrollbar{width:5px}.sidebar nav::-webkit-scrollbar-track{background:transparent}.sidebar nav::-webkit-scrollbar-thumb{background:#416273;border-radius:5px}.sidebar nav::-webkit-scrollbar-thumb:hover{background:#5d8797}
 .sidebar-bottom .workspace{margin:0 0 10px;padding:0 8px 10px;border-bottom:1px solid #314554}
+/* 交付链路地图（总览页） */
+.chain-map{padding:20px}
+.chain-group{margin:16px 0 4px}
+.chain-group>small{display:block;color:var(--muted);font-size:11px;letter-spacing:.4px;margin-bottom:9px}
+.chain-line{display:flex;align-items:center;flex-wrap:wrap;gap:6px;row-gap:10px}
+.chain-node{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:8px 12px;border-top-width:2px}
+.chain-node span{font-size:12px;font-weight:500}
+.chain-node small{font-size:10px;color:var(--muted)}
+.chain-node.m-assets{border-top-color:#689ba9}
+.chain-node.m-clusters{border-top-color:#3d876e}
+.chain-node.m-pools{border-top-color:#ad7d36}
+.chain-arrow{color:#9fb0ba;flex-shrink:0}
+.chain-cross .chain-node{border-top-style:dashed;border-top-color:#c3ced5}
+@media(max-width:800px){.chain-arrow{display:none}.chain-node{flex:1 1 30%}}
+/* 技术方案弹窗：分层流程图（移植自 s1-arch-diagram.html） */
+.arch-wrap{position:relative}
+.arch-layer{position:relative;z-index:1;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:8px}
+.arch-layer>small{display:block;font-size:10px;color:var(--muted);letter-spacing:.05em;margin-bottom:7px}
+.arch-nodes{display:flex;flex-wrap:wrap;gap:7px}
+.arch-node{display:block;background:#f9fafb;border:1px solid #e2e8ee;border-left:3px solid #9ca3af;border-radius:6px;padding:5px 9px;font-size:11px;cursor:pointer;text-align:left}
+.arch-node span{font-weight:500}
+.arch-node small{display:block;font-size:10px;color:#94a1aa;margin-top:1px;font-weight:400}
+.arch-node:hover{transform:translateY(-1px);box-shadow:0 2px 8px #10293814}
+.arch-node.dim{opacity:.3}
+.arch-node.sel{outline:2px solid #243f50}
+.arch-node.t-ctrl{border-left-color:#2563eb}.arch-node.t-bmc{border-left-color:#7c3aed}.arch-node.t-net{border-left-color:#f97316}.arch-node.t-gpu{border-left-color:#16a34a}.arch-node.t-ext{border-left-color:#64748b}
+.arch-wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.arch-flowline{fill:none;stroke-width:2.5;stroke-dasharray:8 6;animation:archdash 1s linear infinite}
+@keyframes archdash{to{stroke-dashoffset:-28}}
+@media(prefers-reduced-motion:reduce){.arch-flowline{animation:none}}
+.arch-steps{margin:18px 0 0;padding-left:18px;display:grid;gap:8px;font-size:12px;color:#657b88}
+.arch-steps b{color:var(--ink);font-weight:600}
+.arch-info{margin-top:12px;background:#f4f7f9;border:1px solid #e3e9ed;border-radius:6px;padding:10px 12px;font-size:12px;color:#657b88;line-height:1.8}
+.arch-info b{color:var(--ink)}

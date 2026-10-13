@@ -4,26 +4,26 @@ import {catalog,forms} from './catalog.js';
 import {prefillValues,requiredChecks,findBlocker,validateFormConfig} from './form-logic.js';
 
 const auditRowApi=['Kubernetes API','management-demo / 业务集群','Rancher / S4 映射','API Audit 策略待定义','审计日志引用','待验证'];
-const auditRowSsh=['SSH / 主机命令','compute-01 等资产','JumpServer 资产授权','会话与命令审计（版本待核实）','会话记录 / 命令引用','示例可申请'];
+const auditRowWebshell=['WebShell / 主机命令','compute-01 等资产','平台授权引用（S4 IAM / RBAC）','会话与命令全量审计（平台自建）','会话记录 / 命令审计','示例可申请'];
 
 test('R01: access 表单覆盖四个通道且支持显式绑定',()=>{
  const channels=forms.access.fields.find(([k])=>k==='通道')[1];
- for(const c of ['SSH / 主机命令','带外 KVM','Kubernetes API','Pod exec'])assert.ok(channels.includes(c),'缺少通道 '+c);
+ for(const c of ['WebShell / 主机命令','带外 KVM','Kubernetes API','Pod exec'])assert.ok(channels.includes(c),'缺少通道 '+c);
  const v=prefillValues(forms.access,auditRowApi);
  assert.equal(v['通道'],'Kubernetes API');
  assert.equal(v['目标范围'],'management-demo / 业务集群');
- const v2=prefillValues(forms.access,auditRowSsh);
- assert.equal(v2['通道'],'SSH / 主机命令');
+ const v2=prefillValues(forms.access,auditRowWebshell);
+ assert.equal(v2['通道'],'WebShell / 主机命令');
 });
 
 test('R01: Kubernetes API 通道不套用终端会话语义',()=>{
  const v=prefillValues(forms.access,auditRowApi);
  const apiChecks=requiredChecks(forms.access,v);
  assert.ok(apiChecks.some(c=>c.includes('不创建终端会话')),'API 通道必须声明不创建终端会话');
- assert.ok(!apiChecks.some(c=>c.includes('JumpServer')),'API 通道不应要求 JumpServer 终端授权');
- const sshChecks=requiredChecks(forms.access,prefillValues(forms.access,auditRowSsh));
- assert.ok(sshChecks.some(c=>c.includes('JumpServer')));
- assert.ok(!sshChecks.some(c=>c.includes('不创建终端会话')));
+ assert.ok(!apiChecks.some(c=>c.includes('WebShell')),'API 通道不应要求 WebShell 终端授权');
+ const webshellChecks=requiredChecks(forms.access,prefillValues(forms.access,auditRowWebshell));
+ assert.ok(webshellChecks.some(c=>c.includes('WebShell')));
+ assert.ok(!webshellChecks.some(c=>c.includes('不创建终端会话')));
 });
 
 test('R04: 确认/转交不要求破坏性授权，破坏性恢复动作必须单独确认',()=>{

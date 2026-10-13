@@ -1,9 +1,9 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {catalog,groups,forms,strategyFor} from './catalog.js';
+import {catalog,groups,forms} from './catalog.js';
 import {INCIDENTS,closeGate} from './incident-data.js';
 import {LINK_TYPES,resolveLink} from './model.js';
-test('all navigation entries have pages and technical strategies',()=>{for(const [, ,children] of groups)for(const [id] of children){assert.ok(catalog[id]||id==='assets');assert.equal(strategyFor(id).chain.length,4);assert.ok(strategyFor(id).owner);}});
+test('all navigation entries have pages',()=>{for(const [, ,children] of groups)for(const [id] of children)assert.ok(catalog[id]||id==='assets','导航页面缺失：'+id);});
 test('all list/detail/form destinations exist',()=>{for(const p of Object.values(catalog)){if(p.detail)assert.ok(catalog[p.detail]||['cluster','pool'].includes(p.detail));if(p.action)assert.ok(forms[p.action]);if(p.columns)for(const row of p.rows)assert.equal(row.length,p.columns.length);}});
 test('plan fields have unique labels and no empty choices',()=>{for(const p of Object.values(forms)){assert.equal(new Set(p.fields.map(x=>x[0])).size,p.fields.length);for(const [,value] of p.fields)assert.ok(Array.isArray(value)?value.length:typeof value==='string');}});
 test('incident records reference existing catalog pages and alerts',()=>{

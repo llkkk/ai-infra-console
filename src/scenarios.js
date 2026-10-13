@@ -38,7 +38,7 @@ export const SCENARIOS=[
   {label:'分配 ALLOC-DEMO-04（已释放）',link:{type:'allocation',id:'ALLOC-DEMO-04'}}]},
  {id:'unknown',title:'未知与权限不足',desc:'无数据标未知；未授权动作不可用',steps:[
   {label:'BMC reserve-01（无数据 / 操作不可用）',link:{type:'bmc',id:'reserve-01'}},
-  {label:'监控大盘（无数据标未知）',link:{page:'monitor'}},
+  {label:'监控总览（无数据标未知）',link:{page:'monitor'}},
   {label:'节点 cpu-worker-01（Unknown / 不可调度）',link:{type:'node',id:'cpu-worker-01'}},
   {label:'待授权会话 SESSION-DEMO-02',link:{type:'session',id:'SESSION-DEMO-02'}},
   {label:'运维接入通道（Kubernetes API 待验证）',link:{page:'audit'}}]}

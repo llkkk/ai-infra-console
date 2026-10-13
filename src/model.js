@@ -98,7 +98,7 @@ export const quotaRecords=[
  {id:'S2 / 模型工程',ext:'project-demo-model',pool:'gpu-general',whole:8,used:6,reserved:0,auth:'S4 授权引用'},
  {id:'S2 / 联调环境',ext:'project-demo-test',pool:'gpu-general',whole:4,used:2,reserved:2,auth:'S4 授权引用'}
 ];
-export const quotaRows=quotaRecords.map(q=>[q.id,q.ext,q.pool,q.whole,q.used,q.reserved,q.auth]);
+// 配额不设独立页面：quotaRecords 供资源池“项目配额”口径与测试使用，不派生列表页行数据。
 export const allocationRecords=[
  {id:'ALLOC-DEMO-01',project:'S2 / 模型工程',source:'S3 申请引用',mode:'整卡',qty:6,state:'已交付',env:'s2-model',lease:'待约定'},
  {id:'ALLOC-DEMO-02',project:'S2 / 联调环境',source:'S3 申请引用',mode:'整卡',qty:2,state:'已交付',env:'s2-test',lease:'待约定'},
@@ -128,7 +128,7 @@ export const requestMatch={
  'REQ-DEMO-01':{
   capacity:{verdict:'通过',detail:'需求 整卡 × 4 ≤ gpu-general 可分配 6（物理 16 − 已分配 8 − 预留 2）'},
   quota:{verdict:'不足',detail:'S2 / 模型工程 配额 8，已分配 6，剩余 2 < 需求 4；需先完成配额调整审批'},
-  next:[['配额调整审批','quota','S2 / 模型工程'],['资源池容量口径','pool','gpu-general'],['已交付分配（等待释放）','allocation','ALLOC-DEMO-01']],
+  next:[['配额调整审批（经 S3/S4 审批流程，无独立页面）',null,'S2 / 模型工程'],['资源池容量口径','pool','gpu-general'],['已交付分配（等待释放）','allocation','ALLOC-DEMO-01']],
   conclusion:'待匹配：容量满足、配额不足；配额调整确认后才创建预留。'},
  'REQ-DEMO-02':{
   capacity:{verdict:'通过（已执行）',detail:'需求 整卡 × 2；已生成预留 ALLOC-DEMO-03'},
@@ -182,7 +182,7 @@ export const imageRows=[
  ['gpu-baseline-02','Linux / x86_64','img-demo-02','按磁盘序列号选择（r02 修订：目标盘策略修正）','镜像预装（候选）','待验证（r01 失败 / r02 重检通过）']
 ];
 export const sessionRows=[
- ['SESSION-DEMO-01','demo-admin','compute-01','SSH','10-10 09:30','已结束','JumpServer 示例引用'],
+ ['SESSION-DEMO-01','demo-admin','compute-01','WebShell','10-10 09:30','已结束','平台会话审计（示例）'],
  ['SESSION-DEMO-02','demo-user','pod-demo','Pod exec','10-10 10:00','待授权','审计方案待定'],
  ['SESSION-DEMO-03','demo-admin','management-demo / apiserver','Kubernetes API','10-10 11:02','已结束','API Audit 引用（候选）'],
  ['SESSION-DEMO-04','demo-hw','compute-02 / BMC','带外 KVM','10-10 11:10','待授权','厂商留痕待适配']
@@ -219,7 +219,6 @@ export const LINK_TYPES={
  image:{detail:'image',rows:()=>imageRows},
  alert:{detail:'alert',rows:()=>alertRows},
  request:{detail:'environment-request',rows:()=>requestRows},
- quota:{detail:'quota',rows:()=>quotaRows},
  incident:{detail:'incident',rows:()=>incidentRows},
  cluster:{detail:'cluster',rows:()=>clusterRows},
  session:{detail:'session',rows:()=>sessionRows},
