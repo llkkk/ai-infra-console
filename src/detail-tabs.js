@@ -1,4 +1,4 @@
-import {bmcRecords,requestMatch,deliveryLife,clusterCapability,nodeRecords} from './model.js';
+import {bmcRecords,requestMatch,deliveryLife,clusterCapability,nodeRecords,gpuRecords} from './model.js';
 
 // 页签内容优先按页面 + 当前对象上下文生成；未覆盖的页签回退到静态表。
 export function tabContent(page,active,context){
@@ -8,7 +8,8 @@ export function tabContent(page,active,context){
   'environment-request':requestTab,
   'delivery':deliveryTab,
   'cluster-capability-detail':clusterCapTab,
-  'node':nodeTab
+  'node':nodeTab,
+  'gpu':gpuTab
  }[page];
  if(gen){const rows=gen(active,id);if(rows)return rows;}
  if(active==='使用对象')return [[id||'demo-object','授权范围引用','测试对象组'],['其他对象','禁止默认全局授权','需独立审批']];
@@ -70,6 +71,32 @@ function nodeTab(active,id){
   ['调度',n.sched,n.state==='Unknown'?'未知状态不参与调度':'—']];
 }
 
+// GPU 设备详情四段：身份与版本 / 实时指标 / 功耗与温度 / 拓扑邻居（对标 CoreWeave 节点详情大盘分段）。
+function gpuTab(active,id){
+ const g=gpuRecords.find(x=>x.id===id);
+ if(!g)return null;
+ if(active==='身份与版本')return [
+  ['设备 UUID',g.id,'—'],
+  ['型号 / 显存',g.model+' / '+g.mem,'硬件盘点（示例）'],
+  ['节点 / 资产',g.node,'—'],
+  ['运行模式',g.mode,'整卡 / MIG / HAMi'],
+  ['驱动版本','待采集','GPU Operator 与镜像预装二选一'],
+  ['资源池','gpu-general','—']];
+ if(active==='实时指标')return [
+  ['GPU 利用率','未接入','DCGM（候选）；不显示假实时曲线'],
+  ['显存占用','未接入','DCGM（候选）'],
+  ['PCIe 带宽','未接入','—']];
+ if(active==='功耗与温度')return [
+  ['功耗','未接入 DCGM · 示例','功耗可作为用量核对的辅助信号，不进计费口径'],
+  ['温度','未接入 · 示例','—'],
+  ['功耗上限','待定','—']];
+ if(active==='拓扑邻居')return [
+  ['NUMA 亲和','待采集','—'],
+  ['NVLink 拓扑','待采集','—'],
+  ['同机 GPU',g.node+' 上其余 7 卡（示例）','—']];
+ return null;
+}
+
 const staticTabs={
  '适用资产':[['compute-01','架构匹配','驱动 / 磁盘策略待核对'],['compute-04','供应中','模板版本锁定']],
  '版本记录':[['revision-demo-02','待审阅','未发布到真实环境'],['revision-demo-01','示例版本','保留历史配置引用']],
@@ -94,6 +121,7 @@ const staticTabs={
  '通知路由':[['底座告警','S1 值班','联系方式只引用'],['模型影响','S2 联系人','关联条件待确认']],
  '静默窗口':[['maintenance-demo','30 分钟 / 示例','不改变底座健康'],['超时恢复通知','执行源负责','策略待定义']],
  '关联会话':[['SESSION-DEMO-01','WebShell','平台会话审计引用'],['Pod exec / KVM / API','能力待验证','独立授权与留存']],
+ '会话时间线':[['09:30','WebShell 会话建立','授权引用 project-access-demo（示例）'],['09:31','执行：查看 GPU 设备状态','命令审计（示例）'],['09:38','异常：非工作时间执行关机命令（示例标记）','需人工复核'],['09:42','会话结束','—']],
  '命令记录':[['命令证据','外部记录引用','不展示真实命令'],['交互审计','与 API Audit 不等价','覆盖范围待验证']],
  '文件传输':[['传输事件','外部审计引用','不加载文件内容'],['留存策略','待 S4 确认','本页非文件管理器']],
  '配置差异':[['模板引用','revision-demo-01 → revision-demo-02','示例变更'],['凭据','仅保留引用名','禁止记录明文']],

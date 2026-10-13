@@ -31,7 +31,7 @@ export const compute03Story={
 
 // ---------- 任务 ----------
 export const taskRecords=[
- {id:'TASK-DEMO-01',type:'装机',target:'compute-04',template:'linux-baseline-01',stage:'镜像供应',state:'进行中',source:'Ironic / BMH（候选）',created:'10-10 10:10',auth:'已确认',incident:null,
+ {id:'TASK-DEMO-01',type:'装机',target:'compute-04',template:'linux-baseline-01',stage:'镜像供应',subStage:'拉取镜像 62%（示例）',bmcState:'BMC 在线 · 电源开（示例）',state:'进行中',source:'Ironic / BMH（候选）',created:'10-10 10:10',auth:'已确认',incident:null,
   phases:[
    {name:'授权与预检',state:'成功',at:'10:10',log:'目标允许重装；数据盘保留策略已确认。'},
    {name:'介质 / PXE 引导',state:'成功',at:'10:12',log:'供应网络引导完成（示例）。'},
@@ -39,7 +39,7 @@ export const taskRecords=[
    {name:'OS 安装',state:'未开始'},{name:'首次启动与初始化',state:'未开始'},{name:'SSH / Agent 注册',state:'未开始'},{name:'节点注册',state:'未开始'},{name:'基线验收',state:'未开始'}],
   confirmPoints:['镜像写入完成后确认目标盘范围','节点注册前确认网络准入'],
   acceptance:[['硬件预检','通过','任务预检阶段'],['OS 安装','执行中','当前阶段：磁盘与镜像'],['SSH / Agent','未开始','依赖 OS'],['Node 注册','未开始','依赖 OS'],['集群能力验收','未开始','独立流程，见集群能力'],['GPU 运行能力','未开始','独立流程，见集群能力']]},
- {id:'TASK-DEMO-02',type:'硬件检查',target:'compute-03',template:'gpu-baseline-02',stage:'磁盘重检（重试通过）',state:'成功（重检）',source:'BMH（候选）',created:'10-10 09:50',auth:'已确认',incident:'INC-DEMO-02',
+ {id:'TASK-DEMO-02',type:'硬件检查',target:'compute-03',template:'gpu-baseline-02',stage:'磁盘重检（重试通过）',subStage:'仅重跑磁盘检查（失败阶段）',bmcState:'BMC 在线 · 电源开（示例）',state:'成功（重检）',source:'BMH（候选）',created:'10-10 09:50',auth:'已确认',incident:'INC-DEMO-02',
   phases:[
    {name:'授权与预检',state:'成功',at:'09:50',log:'检查范围：CPU / 内存 / 磁盘 / 网卡。'},
    {name:'磁盘检查',state:'失败',at:'09:50',log:'失败：目标盘标识与 gpu-baseline-02 模板策略不匹配；资产保持不可交付，不进入资源池。'},
@@ -47,7 +47,7 @@ export const taskRecords=[
    {name:'磁盘重检（仅失败阶段）',state:'成功',at:'10:40',log:'按任务重试预检仅重跑磁盘检查；未重装、未清理；硬件快照版本已刷新。'}],
   confirmPoints:['失败阶段重试前必须核对执行器状态','未知状态不得自动重装或清理'],
   acceptance:compute03Story.acceptance},
- {id:'TASK-DEMO-03',type:'集群创建',target:'compute-lab',template:'rke2-general',stage:'纳管',state:'示例完成',source:'CAPI / Turtles',created:'10-10 09:00',auth:'已确认',incident:null,
+ {id:'TASK-DEMO-03',type:'集群创建',target:'compute-lab',template:'rke2-general',stage:'纳管',subStage:'Rancher 纳管完成（示例）',bmcState:'—',state:'示例完成',source:'CAPI / Turtles',created:'10-10 09:00',auth:'已确认',incident:null,
   phases:[{name:'模板与预检',state:'成功',at:'09:00',log:'示例记录。'},{name:'集群创建与纳管',state:'成功',at:'09:20',log:'Rancher 导入成功；能力验收另行执行。'}],
   confirmPoints:[],acceptance:[['API / Node','就绪（示例）','—'],['能力验收','未开始','独立流程']]}
 ];
@@ -58,7 +58,8 @@ export const modelDeployTaskRows=[
  ['TASK-DEMO-05','模型部署','s2-test / batch-demo','实验中心','Pod 调度','排队中','Kubernetes Deployment（本质是起 Pod）','10-10 10:42']
 ];
 export const allTaskRows=[...taskRecords.map(t=>[t.id,t.type,t.target,t.region||'实验中心',t.stage,t.state,t.source,t.created]),...modelDeployTaskRows];
-export const provisioningRows=taskRecords.map(t=>[t.id,t.target,t.template,t.stage,t.state,t.source,t.auth]);
+// 装机任务列表：主状态下展示子阶段与带外状态（对标 MAAS 装机中视图）；列：任务 / 资产 / 镜像模板 / 主状态 / 子阶段 / 带外状态 / 执行源。
+export const provisioningRows=taskRecords.map(t=>[t.id,t.target,t.template,t.stage,t.subStage,t.bmcState,t.source]);
 
 // ---------- BMC ----------
 export const bmcRecords=[
@@ -101,8 +102,8 @@ export const gpuRows=gpuRecords.map(g=>[g.id,g.node,g.model,g.mem,g.mode,g.healt
 
 // ---------- 配额 / 分配 / 容量 ----------
 export const quotaRecords=[
- {id:'S2 / 模型工程',ext:'project-demo-model',pool:'gpu-general',whole:8,used:6,reserved:0,auth:'S4 授权引用'},
- {id:'S2 / 联调环境',ext:'project-demo-test',pool:'gpu-general',whole:4,used:2,reserved:2,auth:'S4 授权引用'}
+ {id:'S2 / 模型工程',ext:'project-demo-model',pool:'gpu-general',whole:8,used:6,reserved:0,running:5,auth:'S4 授权引用'},
+ {id:'S2 / 联调环境',ext:'project-demo-test',pool:'gpu-general',whole:4,used:2,reserved:2,running:1,auth:'S4 授权引用'}
 ];
 // 配额不设独立页面：quotaRecords 供资源池“项目配额”口径与测试使用，不派生列表页行数据。
 export const allocationRecords=[
