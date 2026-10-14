@@ -1,0 +1,7 @@
+@use './tokens';
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; }
+body { color: var(--console-text); background: var(--console-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }

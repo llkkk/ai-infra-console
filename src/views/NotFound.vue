@@ -1,0 +1,1 @@
+<template><a-result status="404" title="页面不存在" sub-title="该地址未对应已登记的原型页面。"><template #extra><RouterLink to="/overview"><a-button type="primary">返回总览</a-button></RouterLink></template></a-result></template>
